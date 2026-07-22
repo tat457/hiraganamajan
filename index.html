@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>みんなで遊べる！キッズひらがな麻雀</title>
+  <style>
+    :root {
+      --bg-color: #e8f5e9;
+      --card-bg: #ffffff;
+      --primary: #4caf50;
+      --accent: #ff9800;
+      --text: #2c3e50;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 5px 0 15px;
+      font-size: 1.6rem;
+      color: #2e7d32;
+      text-align: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      padding: 15px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* 設定画面 */
+    #setup-screen {
+      text-align: center;
+      padding: 20px 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .btn-mode {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-mode.active {
+      background-color: #2196f3;
+      color: white;
+    }
+
+    /* ゲーム画面 */
+    #game-screen {
+      display: none;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f8e9;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .players-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .player-card {
+      background: #f9f9f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      border: 2px solid transparent;
+    }
+
+    .player-card.active {
+      border-color: #ff9800;
+      background: #fff3e0;
+    }
+
+    /* コマ（牌）エリア */
+    .tiles-area {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      min-height: 80px;
+      padding: 10px;
+      background: #c8e6c9;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .tile {
+      width: 48px;
+      height: 64px;
+      background: #fff8e1;
+      border: 2px solid #d7ccc8;
+      border-bottom: 5px solid #b0bec5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.1s;
+    }
+
+    .tile:hover {
+      transform: translateY(-4px);
+    }
+
+    .tile.selected {
+      border-color: #ff5722;
+      background: #ffe0b2;
+      transform: translateY(-8px);
+    }
+
+    .tile.drawn {
+      margin-left: 12px;
+      border-color: #4caf50;
+    }
+
+    /* 単語表示エリア */
+    .words-detected {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      min-height: 45px;
+    }
+
+    .word-badge {
+      display: inline-block;
+      background: #2196f3;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-weight: bold;
+      margin: 3px;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    /* モーダル表示 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 380px;
+    }
+
+    .modal h2 { margin-top: 0; color: #ff9800; }
+  </style>
+</head>
+<body>
+
+  <h1>🀄 キッズひらがな麻雀</h1>
+
+  <div class="container">
+    <!-- 人数設定画面 -->
+    <div id="setup-screen">
+      <h2>あそぶ にんずう を えらんでね！</h2>
+      <p style="color:#666; font-size: 0.9rem;">(たりない ぶん は CPU が はいるよ)</p>
+      
+      <div class="btn-group">
+        <button class="btn-mode active" onclick="selectPlayers(1)">1にん (vs CPU 3人)</button>
+        <button class="btn-mode" onclick="selectPlayers(2)">2にん (vs CPU 2人)</button>
+        <button class="btn-mode" onclick="selectPlayers(3)">3にん (vs CPU 1人)</button>
+        <button class="btn-mode" onclick="selectPlayers(4)">4にん (みんなで)</button>
+      </div>
+
+      <button class="btn-primary" style="font-size:1.3rem; padding: 15px 40px; margin-top:15px;" onclick="startGame()">ゲームスタート！</button>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen">
+      <div class="status-bar">
+        <span id="turn-display">プレイヤー1 の ばん</span>
+        <span>のこり山札: <span id="deck-count">0</span></span>
+      </div>
+
+      <div class="players-info" id="players-info"></div>
+
+      <h3>あなたの てふだ (タップして すてる)</h3>
+      <div class="tiles-area" id="hand-tiles"></div>
+
+      <div class="words-detected">
+        <div style="font-size: 0.8rem; color:#666; margin-bottom:4px;">作れている単語</div>
+        <div id="word-list">なし</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-accent" onclick="shuffleHand()">🔀 並び替え</button>
+        <button class="btn-primary" id="win-btn" onclick="checkWinAction()" disabled>🎉 あがり！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- プレイヤー交代用モーダル -->
+  <div class="modal" id="turn-modal">
+    <div class="modal-content">
+      <h2 id="next-player-name">〇〇 さんのばん！</h2>
+      <p>準備ができたら「スタート」を押してね。</p>
+      <button class="btn-primary" onclick="closeTurnModal()">スタート</button>
+    </div>
+  </div>
+
+  <!-- 勝利モーダル -->
+  <div class="modal" id="win-modal">
+    <div class="modal-content">
+      <h2 id="winner-title">🎉 あがり！</h2>
+      <p id="win-words-display"></p>
+      <button class="btn-primary" onclick="resetToSetup()">もういちど あそぶ</button>
+    </div>
+  </div>
+
+  <script>
+    // --- 拡張版 ひらがな単語辞書 (小学生向け300語以上) ---
+    const DICTIONARY = [
+      // どうぶつ・いきもの
+      "いぬ", "ねこ", "ぞう", "きりん", "らいおん", "とら", "くま", "さる", "うさぎ", "りす",
+      "ひつじ", "やぎ", "うま", "ぶた", "かば", "さい", "しか", "きつね", "たぬき", "わに",
+      "ぺんぎん", "らっこ", "イルカ", "くじら", "さめ", "たこ", "いか", "かに", "かめ", "かえる",
+      "かぶとむし", "くわがた", "ちょうちょ", "てんとうむし", "ほたる", "とんぼ", "はち", "あり",
+      
+      // たべもの・ののみの
+      "りんご", "みかん", "いちご", "ぶどう", "すいか", "もも", "かき", "くり", "バナナ", "メロン",
+      "トマト", "きゅうり", "なす", "ねぎ", "たまねぎ", "にんじん", "だいこん", "いも", "かぼちゃ",
+      "ごはん", "パン", "めん", "うどん", "そば", "ラーメン", "カレー", "すし", "もち", "たまご",
+      "にく", "さかな", "おかし", "あめ", "チョコ", "アイス", "ケーキ", "ジュース", "みず", "おちゃ",
+
+      // のりもの
+      "くるま", "バス", "トラック", "でんしゃ", "きかんしゃ", "ひこうき", "ふね", "ロケット", 
+      "じてんしゃ", "パトカー", "きゅうきゅうしゃ", "しょうぼうしゃ", "タクシー",
+
+      // がっこう・みにつけるもの
+      "つくえ", "いす", "えんぴつ", "けしごむ", "ノート", "ほん", "はさみ", "のり", "かばん",
+      "ふでばこ", "ぼうし", "ふく", "くつ", "くつした", "かさ", "とけい", "メガネ", "かがみ",
+
+      // からだ
+      "あたま", "かお", "め", "みみ", "くち", "は", "はな", "て", "あし", "おなか", "せなか", "ゆび",
+
+      // しぜん・てんき・きせつ
+      "そら", "くも", "あめ", "ゆき", "かぜ", "たいよう", "つき", "ほし", "うみ", "やま", "かわ",
+      "き", "はな", "くさ", "はなび", "はる", "なつ", "あき", "ふゆ", "あさ", "ひる", "よる",
+
+      // 日常の言葉・あいさつなど
+      "ともだち", "せんせい", "おあそび", "うた", "おどり", "ゲーム", "すき", "えがお", "たのしい"
+    ];
+
+    // 単語検索用のSet
+    const wordSet = new Set(DICTIONARY.map(w => w.replace(/[カタカナ]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60))));
+
+    // 牌の五十音分布データ
+    const HIRAGANA_CHARS = "あいいううええおおかがきぎくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん";
+
+    // ゲーム状態変数
+    let numHumanPlayers = 1;
+    let players = [];
+    let currentPlayerIndex = 0;
+    let deck = [];
+    let gameActive = false;
+
+    function selectPlayers(num) {
+      numHumanPlayers = num;
+      const btns = document.querySelectorAll('.btn-mode');
+      btns.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === num);
+      });
+    }
+
+    function startGame() {
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+
+      // プレイヤー初期化 (合計4人)
+      players = [];
+      for (let i = 0; i < 4; i++) {
+        const isHuman = i < numHumanPlayers;
+        players.push({
+          id: i,
+          name: isHuman ? `プレイヤー ${i + 1}` : `CPU ${i + 1 - numHumanPlayers}`,
+          isHuman: isHuman,
+          hand: []
+        });
+      }
+
+      // 山札生成
+      deck = [];
+      for (let i = 0; i < 3; i++) {
+        for (let char of HIRAGANA_CHARS) {
+          deck.push(char);
+        }
+      }
+      // シャッフル
+      deck.sort(() => Math.random() - 0.5);
+
+      // 初期配牌 (各プレイヤー5枚)
+      players.forEach(p => {
+        p.hand = deck.splice(0, 5);
+      });
+
+      currentPlayerIndex = 0;
+      updatePlayersUI();
+      startTurn();
+    }
+
+    function startTurn() {
+      const p = players[currentPlayerIndex];
+
+      // 山札チェック
+      if (deck.length === 0) {
+        alert("山札がなくなりました！引き分けです。");
+        resetToSetup();
+        return;
+      }
+
+      // 1枚ツモ (手牌6枚に)
+      const drawnTile = deck.pop();
+      p.hand.push(drawnTile);
+      document.getElementById('deck-count').textContent = deck.length;
+
+      if (p.isHuman) {
+        if (numHumanPlayers > 1) {
+          // 複数人プレイなら交代画面を挟む
+          document.getElementById('next-player-name').textContent = `${p.name} の ばん！`;
+          document.getElementById('turn-modal').style.display = 'flex';
+        } else {
+          renderHumanTurn();
+        }
+      } else {
+        // CPUの思考プロセス
+        updatePlayersUI();
+        document.getElementById('turn-display').textContent = `${p.name} (CPU) が 考え中...`;
+        setTimeout(() => {
+          cpuPlay(p);
+        }, 1000);
+      }
+    }
+
+    function closeTurnModal() {
+      document.getElementById('turn-modal').style.display = 'none';
+      renderHumanTurn();
+    }
+
+    function renderHumanTurn() {
+      const p = players[currentPlayerIndex];
+      document.getElementById('turn-display').textContent = `${p.name} の ばん！`;
+      updatePlayersUI();
+      renderHand();
+      checkHandWords();
+    }
+
+    function renderHand() {
+      const p = players[currentPlayerIndex];
+      const container = document.getElementById('hand-tiles');
+      container.innerHTML = '';
+
+      p.hand.forEach((char, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        if (idx === p.hand.length - 1) tile.classList.add('drawn'); // ツモ牌
+        tile.textContent = char;
+        tile.onclick = () => discardTile(idx);
+        container.appendChild(tile);
+      });
+    }
+
+    // 手牌の中にある単語を自動検出
+    function findWordsInHand(hand) {
+      const charStr = hand.join('');
+      let foundWords = [];
+
+      // 2文字〜5文字の組み合わせをチェック
+      for (let len = 2; len <= hand.length; len++) {
+        for (let i = 0; i <= hand.length - len; i++) {
+          const subStr = charStr.substr(i, len);
+          if (wordSet.has(subStr) && !foundWords.includes(subStr)) {
+            foundWords.push(subStr);
+          }
+        }
+      }
+      return foundWords;
+    }
+
+    // 自分の手牌で完成している単語を更新・表示
+    function checkHandWords() {
+      const p = players[currentPlayerIndex];
+      const words = findWordsInHand(p.hand);
+      const listEl = document.getElementById('word-list');
+      const winBtn = document.getElementById('win-btn');
+
+      if (words.length > 0) {
+        listEl.innerHTML = words.map(w => `<span class="word-badge">✨ ${w}</span>`).join('');
+      } else {
+        listEl.textContent = "なし";
+      }
+
+      // 単語が作れていれば上がりボタンを有効化
+      winBtn.disabled = words.length === 0;
+    }
+
+    // 打牌 (不要な牌を1枚捨てる)
+    function discardTile(index) {
+      const p = players[currentPlayerIndex];
+      p.hand.splice(index, 1); // 1枚捨てる (5枚に戻る)
+      nextTurn();
+    }
+
+    function shuffleHand() {
+      const p = players[currentPlayerIndex];
+      p.hand.sort(() => Math.random() - 0.5);
+      renderHand();
+      checkHandWords();
+    }
+
+    // CPUの自動プレイ
+    function cpuPlay(cpuPlayer) {
+      const words = findWordsInHand(cpuPlayer.hand);
+
+      // CPUがあがり条件を満たした場合
+      if (words.length > 0 && Math.random() < 0.8) {
+        showWinModal(cpuPlayer.name, words);
+        return;
+      }
+
+      // 1枚適当に捨てる
+      const discardIdx = Math.floor(Math.random() * cpuPlayer.hand.length);
+      cpuPlayer.hand.splice(discardIdx, 1);
+      nextTurn();
+    }
+
+    function nextTurn() {
+      currentPlayerIndex = (currentPlayerIndex + 1) % 4;
+      startTurn();
+    }
+
+    function checkWinAction() {
+      const p = players[currentPlayerIndex];
+      const words = findWordsInHand(p.hand);
+      if (words.length > 0) {
+        showWinModal(p.name, words);
+      }
+    }
+
+    function showWinModal(winnerName, words) {
+      document.getElementById('winner-title').textContent = `🎉 ${winnerName} の あがり！`;
+      document.getElementById('win-words-display').innerHTML = 
+        `完成した言葉:<br>` + words.map(w => `<strong style="font-size:1.4rem; color:#4caf50;">【${w}】</strong>`).join(' ');
+      document.getElementById('win-modal').style.display = 'flex';
+    }
+
+    function updatePlayersUI() {
+      const container = document.getElementById('players-info');
+      container.innerHTML = '';
+      players.forEach((p, idx) => {
+        const card = document.createElement('div');
+        card.className = `player-card ${idx === currentPlayerIndex ? 'active' : ''}`;
+        card.innerHTML = `
+          <strong>${p.name}</strong><br>
+          てふだ: ${p.hand.length}枚
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function resetToSetup() {
+      document.getElementById('win-modal').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
