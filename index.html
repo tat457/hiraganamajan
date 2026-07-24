@@ -229,6 +229,16 @@
         let selectedIndex = null;
         let isTsumoSelected = false;
 
+        // シャッフル関数
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
         // 画面読み込み時の初期化処理
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof DICTIONARY !== 'undefined' && DICTIONARY.length > 0) {
@@ -245,16 +255,19 @@
                 return;
             }
 
-            deck = [];
+            // 1. 全てのひらがな牌セット（約100枚）を生成
+            let allTiles = [];
             HIRAGANA_LIST.forEach(char => {
-                deck.push(char, char);
+                allTiles.push(char, char);
                 if (['あ','い','う','え','お','か','し','て','と','り','ん'].includes(char)) {
-                    deck.push(char);
+                    allTiles.push(char);
                 }
             });
-            
-            deck.sort(() => Math.random() - 0.5);
 
+            // 2. シャッフルして先頭の50枚だけを今回の山札にする
+            deck = shuffle(allTiles).slice(0, 50);
+
+            // 3. 配牌（10枚引く）※山札残りは40枚になります
             hand = deck.splice(0, 10);
             tsumo = null;
             discards = [];
@@ -265,7 +278,7 @@
             document.getElementById('btn-tsumo').disabled = false;
             document.getElementById('btn-sort').disabled = false;
             document.getElementById('btn-agari').disabled = false;
-            
+
             setMessage('対局開始！まずは「ツモ」ボタンを押してください。');
             updateUI();
         }
@@ -391,21 +404,7 @@
             }
             return null;
         }
-// 配列をシャッフルする関数（フィッシャー–イェーツのシャッフル）
-function shuffle(array) {
-    const shuffled = [...array]; // 元の配列を壊さないようにコピー
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-}
 
-// DICTIONARY からランダムに50枚選んで山札を作成
-const deck = shuffle(DICTIONARY).slice(0, 50);
-
-console.log(`山札の枚数: ${deck.length}枚`);
-console.log(deck); // 50枚の単語リストが入ります
         function updateUI() {
             document.getElementById('deck-count').innerText = deck.length;
 
