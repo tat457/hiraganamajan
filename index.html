@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ひらがな麻雀</title>
+    <!-- word.js を読み込む -->
+    <script src="word.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -183,7 +185,7 @@
     <div class="game-board">
         <div class="status-bar">
             <div>山札残り: <span id="deck-count">0</span> 枚</div>
-            <div id="status-text">単語辞書読み込み中...</div>
+            <div id="status-text">準備完了</div>
         </div>
 
         <div class="discard-area">
@@ -191,7 +193,7 @@
             <div id="discard-pool" class="tile-container"></div>
         </div>
 
-        <div class="message-box" id="message-box">単語データ (word.json) を読み込んでいます...</div>
+        <div class="message-box" id="message-box">「対局開始」を押すとゲームが始まります！</div>
 
         <div class="player-area">
             <div class="hand-label">あなたの手牌（牌を選択して「打牌」で捨てます）</div>
@@ -202,7 +204,7 @@
         </div>
 
         <div class="controls">
-            <button id="btn-start" onclick="startGame()" disabled>対局開始</button>
+            <button id="btn-start" onclick="startGame()">対局開始</button>
             <button id="btn-tsumo" onclick="tsumoTile()" disabled>ツモ</button>
             <button id="btn-discard" onclick="discardSelected()" disabled>打牌（捨てる）</button>
             <button id="btn-sort" onclick="sortHand()" disabled>理牌（並べ替え）</button>
@@ -211,10 +213,7 @@
     </div>
 
     <script>
-        // 辞書配列（word.json から読み込み）
-        let DICTIONARY = [];
-
-        // ひらがな五十音リスト
+        // 五十音リスト
         const HIRAGANA_LIST = [
             'あ','い','う','え','お','か','き','く','け','こ',
             'さ','し','す','せ','そ','た','ち','つ','て','と',
@@ -230,30 +229,19 @@
         let selectedIndex = null;
         let isTsumoSelected = false;
 
-        // ページ読み込み時に word.json を非同期で取得
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('word.json');
-                if (!response.ok) {
-                    throw new Error(`HTTPエラー! status: ${response.status}`);
-                }
-                DICTIONARY = await response.json();
-                
-                // 読み込み完了後にボタンを有効化
-                document.getElementById('btn-start').disabled = false;
-                document.getElementById('status-text').innerText = '準備完了';
-                setMessage(`辞書データ（${DICTIONARY.length}語）を読み込みました！「対局開始」を押してください。`);
-            } catch (error) {
-                console.error('word.json の読み込みに失敗しました:', error);
-                setMessage('⚠️ word.json の読み込みに失敗しました。ローカルサーバー経由（Live Server等）で開いているか確認してください。');
-                document.getElementById('status-text').innerText = '読み込みエラー';
+        // 画面読み込み時の初期化処理
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof DICTIONARY !== 'undefined' && DICTIONARY.length > 0) {
+                setMessage(`単語辞書（${DICTIONARY.length}語）の読み込み完了！「対局開始」を押してください。`);
+            } else {
+                setMessage('⚠️ word.js が読み込めていません。index.html と同じフォルダに word.js があるか確認してください。');
             }
         });
 
-        // ゲーム初期化・開始
+        // ゲーム開始
         function startGame() {
-            if (DICTIONARY.length === 0) {
-                setMessage('辞書データが読み込まれていません。');
+            if (typeof DICTIONARY === 'undefined' || DICTIONARY.length === 0) {
+                setMessage('辞書データが見つかりません。');
                 return;
             }
 
