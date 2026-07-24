@@ -3,68 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webサイト</title>
+    <title>ひらがな麻雀</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
         }
+
         body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f9f9f9;
+            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background-color: #0f381e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
         }
-        header {
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 2rem 1rem;
-            text-align: center;
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
         }
-        main {
+
+        .game-board {
+            width: 100%;
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            background-color: #ffffff;
+            background-color: #1b5e20;
+            border: 8px solid #3e2723;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .discard-area {
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px;
         }
-        .content {
-            padding: 2rem;
+
+        .discard-title {
+            font-size: 0.85rem;
+            color: #a5d6a7;
+            margin-bottom: 8px;
         }
-        h2 {
-            margin-bottom: 1rem;
-            color: #007bff;
+
+        .tile-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
         }
-        p {
-            margin-bottom: 1rem;
+
+        .tile {
+            width: 44px;
+            height: 62px;
+            background: linear-gradient(to bottom, #ffffff, #eae6d9);
+            border: 1px solid #b0bec5;
+            border-bottom: 5px solid #8d6e63;
+            border-radius: 6px;
+            color: #111;
+            font-weight: bold;
+            font-size: 1.6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 2px 3px 5px rgba(0,0,0,0.3);
+            transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
         }
-        footer {
+
+        .tile:hover {
+            transform: translateY(-4px);
+        }
+
+        .tile.selected {
+            transform: translateY(-12px);
+            border: 2px solid #f39c12;
+            box-shadow: 0 0 12px #f1c40f;
+        }
+
+        .tile.discarded {
+            width: 34px;
+            height: 48px;
+            font-size: 1.2rem;
+            cursor: default;
+            border-bottom-width: 3px;
+            opacity: 0.85;
+        }
+
+        .tile.tsumo-tile {
+            margin-left: 15px;
+            border-color: #29b6f6;
+        }
+
+        .player-area {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .hand-label {
+            font-size: 0.85rem;
+            color: #a5d6a7;
+            margin-bottom: 10px;
+        }
+
+        .hand-row {
+            display: flex;
+            align-items: center;
+            min-height: 70px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #f39c12, #d35400);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: linear-gradient(to bottom, #f1c40f, #e67e22);
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .message-box {
             text-align: center;
-            padding: 1rem;
-            font-size: 0.875rem;
-            color: #666;
-            margin-top: 2rem;
+            min-height: 1.5rem;
+            font-weight: bold;
+            color: #ffe082;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Welcome to My Website</h1>
-    </header>
+    <h1>🀄️ ひらがな麻雀</h1>
 
-    <main>
-        <div class="content">
-            <h2>はじめに</h2>
-            <p>これは `index.html` の基本サンプルです。必要に応じてコンテンツやスタイルを書き換えてご使用ください。</p>
+    <div class="game-board">
+        <div class="status-bar">
+            <div>山札残り: <span id="deck-count">0</span> 枚</div>
+            <div id="status-text">単語辞書読み込み中...</div>
         </div>
-    </main>
 
-    <footer>
-        <p>&copy; 2026 My Website</p>
-    </footer>
+        <div class="discard-area">
+            <div class="discard-title">河（捨て牌）</div>
+            <div id="discard-pool" class="tile-container"></div>
+        </div>
 
+        <div class="message-box" id="message-box">単語データ (word.json) を読み込んでいます...</div>
+
+        <div class="player-area">
+            <div class="hand-label">あなたの手牌（牌を選択して「打牌」で捨てます）</div>
+            <div class="hand-row">
+                <div id="hand-tiles" class="tile-container"></div>
+                <div id="tsumo-container"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-start" onclick="startGame()" disabled>対局開始</button>
+            <button id="btn-tsumo" onclick="tsumoTile()" disabled>ツモ</button>
+            <button id="btn-discard" onclick="discardSelected()" disabled>打牌（捨てる）</button>
+            <button id="btn-sort" onclick="sortHand()" disabled>理牌（並べ替え）</button>
+            <button id="btn-agari" onclick="checkAgari()" disabled>アガリ！</button>
+        </div>
+    </div>
+
+    <script>
+        // 辞書配列（word.json から読み込み）
+        let DICTIONARY = [];
+
+        // ひらがな五十音リスト
+        const HIRAGANA_LIST = [
+            'あ','い','う','え','お','か','き','く','け','こ',
+            'さ','し','す','せ','そ','た','ち','つ','て','と',
+            'な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ',
+            'ま','み','む','め','も','や','ゆ','よ','ら','り',
+            'る','れ','ろ','わ','ん'
+        ];
+
+        let deck = [];
+        let hand = [];
+        let tsumo = null;
+        let discards = [];
+        let selectedIndex = null;
+        let isTsumoSelected = false;
+
+        // ページ読み込み時に word.json を非同期で取得
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('word.json');
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー! status: ${response.status}`);
+                }
+                DICTIONARY = await response.json();
+                
+                // 読み込み完了後にボタンを有効化
+                document.getElementById('btn-start').disabled = false;
+                document.getElementById('status-text').innerText = '準備完了';
+                setMessage(`辞書データ（${DICTIONARY.length}語）を読み込みました！「対局開始」を押してください。`);
+            } catch (error) {
+                console.error('word.json の読み込みに失敗しました:', error);
+                setMessage('⚠️ word.json の読み込みに失敗しました。ローカルサーバー経由（Live Server等）で開いているか確認してください。');
+                document.getElementById('status-text').innerText = '読み込みエラー';
+            }
+        });
+
+        // ゲーム初期化・開始
+        function startGame() {
+            if (DICTIONARY.length === 0) {
+                setMessage('辞書データが読み込まれていません。');
+                return;
+            }
+
+            deck = [];
+            HIRAGANA_LIST.forEach(char => {
+                deck.push(char, char);
+                if (['あ','い','う','え','お','か','し','て','と','り','ん'].includes(char)) {
+                    deck.push(char);
+                }
+            });
+            
+            deck.sort(() => Math.random() - 0.5);
+
+            hand = deck.splice(0, 10);
+            tsumo = null;
+            discards = [];
+            selectedIndex = null;
+            isTsumoSelected = false;
+
+            document.getElementById('btn-start').innerText = 'やり直す';
+            document.getElementById('btn-tsumo').disabled = false;
+            document.getElementById('btn-sort').disabled = false;
+            document.getElementById('btn-agari').disabled = false;
+            
+            setMessage('対局開始！まずは「ツモ」ボタンを押してください。');
+            updateUI();
+        }
+
+        function tsumoTile() {
+            if (tsumo !== null) {
+                setMessage('先に不要な牌を1枚捨ててください。');
+                return;
+            }
+            if (deck.length === 0) {
+                setMessage('山札がなくなりました！流局です。');
+                document.getElementById('btn-tsumo').disabled = true;
+                return;
+            }
+
+            tsumo = deck.pop();
+            selectedIndex = null;
+            isTsumoSelected = false;
+            setMessage(`「${tsumo}」をツモりました！不要な牌を選んで「打牌」してください。`);
+            updateUI();
+        }
+
+        function selectHandTile(index) {
+            selectedIndex = index;
+            isTsumoSelected = false;
+            updateUI();
+        }
+
+        function selectTsumoTile() {
+            selectedIndex = null;
+            isTsumoSelected = true;
+            updateUI();
+        }
+
+        function discardSelected() {
+            if (tsumo === null) {
+                setMessage('牌をツモってから捨ててください。');
+                return;
+            }
+
+            if (isTsumoSelected) {
+                discards.push(tsumo);
+                tsumo = null;
+            } else if (selectedIndex !== null) {
+                discards.push(hand[selectedIndex]);
+                hand[selectedIndex] = tsumo;
+                tsumo = null;
+            } else {
+                setMessage('捨てる牌を選択してください！');
+                return;
+            }
+
+            selectedIndex = null;
+            isTsumoSelected = false;
+            setMessage('牌を捨てました。次の「ツモ」を行ってください。');
+            updateUI();
+        }
+
+        function sortHand() {
+            hand.sort((a, b) => HIRAGANA_LIST.indexOf(a) - HIRAGANA_LIST.indexOf(b));
+            selectedIndex = null;
+            updateUI();
+        }
+
+        function checkAgari() {
+            const allChars = [...hand];
+            if (tsumo) allChars.push(tsumo);
+
+            if (allChars.length < 11) {
+                setMessage('牌が足りません！ツモって11文字でアガリ判定を行います。');
+                return;
+            }
+
+            const charCounts = {};
+            allChars.forEach(c => charCounts[c] = (charCounts[c] || 0) + 1);
+
+            let result = null;
+            const headCandidates = Object.keys(charCounts).filter(char => charCounts[char] >= 2);
+
+            for (let head of headCandidates) {
+                const tempCounts = { ...charCounts };
+                tempCounts[head] -= 2;
+
+                const words = findWords(tempCounts);
+                if (words !== null) {
+                    result = { head, words };
+                    break;
+                }
+            }
+
+            if (result) {
+                const wordListStr = result.words.join(' / ');
+                setMessage(`🎉 アガリ！！ 【完成単語】${wordListStr} 【対子(頭)】${result.head}${result.head}`);
+            } else {
+                setMessage('❌ 残念！まだアガリの形（単語＋同じ文字2枚のペア）になっていません。');
+            }
+        }
+
+        function findWords(counts) {
+            const remainingCount = Object.values(counts).reduce((a, b) => a + b, 0);
+            if (remainingCount === 0) return [];
+
+            for (let word of DICTIONARY) {
+                if (word.length > remainingCount) continue;
+
+                let canForm = true;
+                let tempMap = { ...counts };
+
+                for (let char of word) {
+                    if (!tempMap[char] || tempMap[char] <= 0) {
+                        canForm = false;
+                        break;
+                    }
+                    tempMap[char]--;
+                }
+
+                if (canForm) {
+                    const subResult = findWords(tempMap);
+                    if (subResult !== null) {
+                        return [word, ...subResult];
+                    }
+                }
+            }
+            return null;
+        }
+
+        function updateUI() {
+            document.getElementById('deck-count').innerText = deck.length;
+
+            const handTilesDiv = document.getElementById('hand-tiles');
+            handTilesDiv.innerHTML = '';
+            hand.forEach((char, idx) => {
+                const tile = document.createElement('div');
+                tile.className = `tile ${selectedIndex === idx ? 'selected' : ''}`;
+                tile.innerText = char;
+                tile.onclick = () => selectHandTile(idx);
+                handTilesDiv.appendChild(tile);
+            });
+
+            const tsumoContainer = document.getElementById('tsumo-container');
+            tsumoContainer.innerHTML = '';
+            if (tsumo) {
+                const tsumoTileDiv = document.createElement('div');
+                tsumoTileDiv.className = `tile tsumo-tile ${isTsumoSelected ? 'selected' : ''}`;
+                tsumoTileDiv.innerText = tsumo;
+                tsumoTileDiv.onclick = selectTsumoTile;
+                tsumoContainer.appendChild(tsumoTileDiv);
+            }
+
+            const discardPoolDiv = document.getElementById('discard-pool');
+            discardPoolDiv.innerHTML = '';
+            discards.forEach(char => {
+                const tile = document.createElement('div');
+                tile.className = 'tile discarded';
+                tile.innerText = char;
+                discardPoolDiv.appendChild(tile);
+            });
+
+            document.getElementById('btn-discard').disabled = (tsumo === null || (selectedIndex === null && !isTsumoSelected));
+        }
+
+        function setMessage(msg) {
+            document.getElementById('message-box').innerText = msg;
+        }
+    </script>
 </body>
 </html>
