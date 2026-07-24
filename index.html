@@ -391,7 +391,21 @@
             }
             return null;
         }
+// 配列をシャッフルする関数（フィッシャー–イェーツのシャッフル）
+function shuffle(array) {
+    const shuffled = [...array]; // 元の配列を壊さないようにコピー
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
 
+// DICTIONARY からランダムに50枚選んで山札を作成
+const deck = shuffle(DICTIONARY).slice(0, 50);
+
+console.log(`山札の枚数: ${deck.length}枚`);
+console.log(deck); // 50枚の単語リストが入ります
         function updateUI() {
             document.getElementById('deck-count').innerText = deck.length;
 
