@@ -1,8 +1,4 @@
-import json
-import re
-
-# Comprehensive list of Japanese Hiragana words across various categories
-raw_words = [
+[
     # 2文字
     "あい", "あお", "あか", "あき", "あぐ", "あさ", "あせ", "あと", "あね", "あめ", "あゆ", "あり", "あん",
     "いい", "いえ", "いけ", "いと", "いぬ", "いま", "いも", "いり", "いん", "うえ", "うお", "うし", "うた",
@@ -153,20 +149,3 @@ raw_words = [
     "やきいも", "やさい", "やまのぼり", "ゆうえんち", "ゆきだるま", "ゆきがっせん",
     "らいおん", "りんご", "りゅうぐうじょう", "れいぞうこ", "ろけっと", "わたあめ"
 ]
-
-clean_words = set()
-for w in raw_words:
-    w_clean = re.sub(r'[^ぁ-んー]', '', w)
-    if len(w_clean) >= 2:
-        clean_words.add(w_clean)
-
-sorted_word_list = sorted(list(clean_words))
-
-# Save as words.json and word.json
-with open('words.json', 'w', encoding='utf-8') as f:
-    json.dump(sorted_word_list, f, ensure_ascii=False, indent=2)
-
-with open('word.json', 'w', encoding='utf-8') as f:
-    json.dump(sorted_word_list, f, ensure_ascii=False, indent=2)
-
-print(f"Generated {len(sorted_word_list)} unique hiragana words successfully!")
