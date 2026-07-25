@@ -363,7 +363,7 @@
             'る','れ','ろ','わ','ん'
         ];
 
-        // 言語イラストマッピング辞書（単語に対応するイラスト・アイコン絵文字）
+        // 言語イラストマッピング辞書
         const WORD_ILLUST_MAP = {
             'ねこ': '🐱', 'いぬ': '🐶', 'さかな': '🐟', 'とり': '🐦', 'くま': '🐻', 'うさぎ': '🐰',
             'すいか': '🍉', 'あいす': '🍦', 'りんご': '🍎', 'みかん': '🍊', 'いちご': '🍓', 'ぶどう': '🍇',
@@ -406,14 +406,17 @@
             if (typeof DICTIONARY === 'undefined' || DICTIONARY.length === 0) return;
 
             let allTiles = [];
+            // 46文字 × 2枚 ＝ 92枚
             HIRAGANA_LIST.forEach(char => {
                 allTiles.push(char, char);
-                if (['あ','い','う','え','お','か','し','て','と','り','ん'].includes(char)) {
+                // 母音やよく使われる文字を追加して山札が100枚以上になるように調整（全108枚）
+                if (['あ','い','う','え','お','か','き','く','し','て','と','り','ん','は','つ','ま'].includes(char)) {
                     allTiles.push(char);
                 }
             });
 
-            deck = shuffle(allTiles).slice(0, 50);
+            // ★ 山札を100枚に設定
+            deck = shuffle(allTiles).slice(0, 100);
             isGameOver = false;
 
             players.forEach(p => {
@@ -654,7 +657,6 @@
             document.getElementById('message-box').innerText = msg;
         }
 
-        // --- 🖼️ 言葉をイラスト画像バッジに変換して合成する機能 ---
         function showMemorialModal(words, head, winnerName) {
             const modal = document.getElementById('modal');
             document.getElementById('modal-title').innerText = `🎉 ${winnerName} の勝ち！`;
@@ -663,7 +665,6 @@
             const canvas = document.getElementById('memorial-canvas');
             const ctx = canvas.getContext('2d');
 
-            // 背景描画（ポップなビビッドグラデーション）
             const grad = ctx.createLinearGradient(0, 0, 600, 420);
             grad.addColorStop(0, '#f1c40f');
             grad.addColorStop(0.5, '#e67e22');
@@ -671,7 +672,6 @@
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, 600, 420);
 
-            // 背景パターン装飾（キラキラ丸）
             const confettiColors = ['#ffffff', '#ffeaa7', '#74b9ff', '#55efc4', '#fd79a8'];
             for (let i = 0; i < 35; i++) {
                 ctx.fillStyle = confettiColors[i % confettiColors.length];
@@ -682,12 +682,10 @@
             }
             ctx.globalAlpha = 1.0;
 
-            // 外枠
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 8;
             ctx.strokeRect(12, 12, 576, 396);
 
-            // ヘッダータイトル
             ctx.fillStyle = '#ffffff';
             ctx.font = '900 26px "M PLUS Rounded 1c", sans-serif';
             ctx.textAlign = 'center';
@@ -695,23 +693,18 @@
             ctx.shadowBlur = 8;
             ctx.fillText('🀄️ ひらがなドンジャラ 完成イラストカード 🀄️', 300, 52);
 
-            // 勝者テキスト
             ctx.fillStyle = '#ffeaa7';
             ctx.font = 'bold 20px sans-serif';
             ctx.fillText(`🏆 勝者：${winnerName} 🏆`, 300, 85);
 
-            // --- 言葉 → イラストバッジ化 描画処理 ---
             const totalItems = words.length;
             const startY = 120;
             const cardHeight = Math.min(80, 220 / totalItems);
 
             words.forEach((word, index) => {
                 const y = startY + index * (cardHeight + 15);
-                
-                // 言語に対応するイラスト画像（絵文字）を取得（無ければキラキラスター）
                 const illust = WORD_ILLUST_MAP[word] || '✨';
 
-                // イラストカード台座（白枠付き丸角ボックス）
                 ctx.fillStyle = '#ffffff';
                 ctx.shadowColor = 'rgba(0,0,0,0.2)';
                 ctx.shadowBlur = 6;
@@ -719,7 +712,6 @@
                 ctx.roundRect(80, y, 440, cardHeight, 16);
                 ctx.fill();
 
-                // 1. イラスト画像バッジ（円形イラストアイコン）の合成
                 const badgeRadius = cardHeight * 0.38;
                 const badgeX = 125;
                 const badgeY = y + cardHeight / 2;
@@ -729,27 +721,23 @@
                 ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // イラスト（絵文字）の描画
                 ctx.font = `${cardHeight * 0.55}px sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.shadowBlur = 0;
                 ctx.fillText(illust, badgeX, badgeY + 2);
 
-                // 2. 言葉（テキスト）の描画
                 ctx.fillStyle = '#2c3e50';
                 ctx.font = `bold ${cardHeight * 0.42}px "M PLUS Rounded 1c", sans-serif`;
                 ctx.textAlign = 'left';
                 ctx.fillText(word, 175, badgeY);
 
-                // 3. 右側のデザインスタンプ
                 ctx.font = `bold ${cardHeight * 0.3}px sans-serif`;
                 ctx.fillStyle = '#e67e22';
                 ctx.textAlign = 'right';
                 ctx.fillText('【完成】', 500, badgeY);
             });
 
-            // --- アタマ（ペア）のイラスト表示 ---
             const headY = startY + words.length * (cardHeight + 15) + 10;
             ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.beginPath();
