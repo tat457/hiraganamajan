@@ -33,7 +33,7 @@
             letter-spacing: 2px;
         }
 
-        /* アガリガイド */
+        /* ルールガイド */
         .guide-box {
             background: rgba(255, 255, 255, 0.95);
             color: #2c3e50;
@@ -43,7 +43,7 @@
             max-width: 800px;
             width: 100%;
             margin-bottom: 12px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .guide-title {
@@ -71,7 +71,7 @@
         }
         .badge-head { background: #27ae60; }
 
-        /* ドンジャラ卓（ボード） */
+        /* ドンジャラ卓 */
         .game-board {
             width: 100%;
             max-width: 800px;
@@ -89,7 +89,6 @@
             position: relative;
         }
 
-        /* プレイヤーエリア配置 */
         .player-top { grid-area: 1 / 2 / 2 / 3; display: flex; flex-direction: column; align-items: center; }
         .player-left { grid-area: 2 / 1 / 3 / 2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .player-right { grid-area: 2 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -115,7 +114,6 @@
             100% { transform: scale(1.08); }
         }
 
-        /* 中央の卓（河・山札） */
         .center-table {
             grid-area: 2 / 2 / 3 / 3;
             background: rgba(16, 92, 47, 0.8);
@@ -139,7 +137,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* 捨て牌（河）エリア */
         .discard-grid {
             width: 100%;
             height: 100%;
@@ -173,10 +170,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
+            cursor: grab;
             box-shadow: 1px 2px 4px rgba(0,0,0,0.3);
-            transition: all 0.15s ease;
+            transition: transform 0.15s, border 0.15s;
         }
+        .tile:active { cursor: grabbing; }
         .tile:hover { transform: translateY(-4px); }
         .tile.selected {
             transform: translateY(-10px);
@@ -187,33 +185,20 @@
             background: linear-gradient(to bottom, #f39c12, #d35400);
             border-bottom: 5px solid #a04000;
             color: transparent;
+            cursor: default;
         }
         .tile.small {
             width: 24px;
             height: 34px;
             font-size: 0.9rem;
             border-bottom-width: 3px;
+            cursor: default;
         }
 
-        /* 手牌配置 */
-        .hand-vertical {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .hand-horizontal {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+        .hand-vertical { display: flex; flex-direction: column; gap: 2px; }
+        .hand-horizontal { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
 
-        /* 操作UI */
-        .controls {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
+        .controls { display: flex; gap: 8px; margin-top: 8px; }
 
         button {
             background: linear-gradient(to bottom, #ff7675, #d63031);
@@ -234,22 +219,20 @@
             cursor: not-allowed;
             transform: none;
         }
-        .btn-agari {
-            background: linear-gradient(to bottom, #00b894, #00b894);
-        }
+        .btn-agari { background: linear-gradient(to bottom, #00b894, #00b894); }
 
         .message-box {
             background: rgba(0,0,0,0.7);
             color: #ffeaa7;
             padding: 6px 16px;
             border-radius: 15px;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: bold;
             margin-bottom: 6px;
             text-align: center;
         }
 
-        /* モーダル＆記念イラストCanvas */
+        /* モーダル */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -265,13 +248,13 @@
             padding: 20px;
             border-radius: 20px;
             text-align: center;
-            max-width: 650px;
+            max-width: 680px;
             width: 95%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         canvas {
             width: 100%;
-            max-width: 580px;
+            max-width: 620px;
             border-radius: 16px;
             border: 4px solid #f39c12;
             margin: 10px 0;
@@ -283,18 +266,19 @@
     <h1>🀄️ ひらがなドンジャラ</h1>
 
     <div class="guide-box">
-        <div class="guide-title">💡 あがりのルール（合計11枚で完成！）</div>
-        手牌10枚 ＋ ツモ1枚で、**「言葉（2文字以上）」＋「言葉」... ＋「同じ文字2枚（アタマ）」** を作るとアガリです！
+        <div class="guide-title">💡 あがりのルール（合計11枚）＆ 操作方法</div>
+        言葉 ＋ 言葉 ＋ ... ＋ 同じ文字2枚（アタマ）で上がり！<br>
+        🖐️ <b>手牌の並び替え：</b>牌をクリックして別の牌を選ぶか、<b>ドラッグ＆ドロップ</b>で好きな場所に移動できます。
         <div class="guide-example">
             【例】
-            <span class="badge">あ い す</span>
-            <span class="badge">す い か</span>
-            <span class="badge">ね こ</span>
+            <span class="badge">さ る</span>
+            <span class="badge">き じ</span>
+            <span class="badge">ら い お ん</span>
             <span class="badge badge-head">い い (ペア)</span>
         </div>
     </div>
 
-    <div class="message-box" id="message-box">「対局開始」を押すと4人ゲームが始まります！</div>
+    <div class="message-box" id="message-box">「対局開始」を押すとゲームが始まります！</div>
 
     <div class="game-board">
         <!-- 対面 (CPU2) -->
@@ -309,7 +293,7 @@
             <div id="hand-cpu1" class="hand-vertical"></div>
         </div>
 
-        <!-- 中央卓（河・パイ山） -->
+        <!-- 中央卓 -->
         <div class="center-table">
             <div class="deck-info">山札: <span id="deck-count">0</span> 枚</div>
             <div class="discard-grid">
@@ -336,7 +320,7 @@
             <div class="controls">
                 <button id="btn-start" onclick="startGame()">対局開始</button>
                 <button id="btn-discard" onclick="discardSelected()" disabled>打牌（捨てる）</button>
-                <button id="btn-sort" onclick="sortHand()" disabled>理牌（並べる）</button>
+                <button id="btn-sort" onclick="sortHand()" disabled>理牌（五十音順）</button>
                 <button id="btn-agari" class="btn-agari" onclick="checkAgari(true)" disabled>アガリ！</button>
             </div>
         </div>
@@ -346,10 +330,10 @@
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <h2 id="modal-title" style="color: #e67e22;">🎉 おめでとうございます！</h2>
-            <p id="modal-desc">言葉がイラスト画像に合成されました！</p>
-            <canvas id="memorial-canvas" width="600" height="420"></canvas>
+            <p id="modal-desc">仲間たちが肩を組んで大喜びしています！</p>
+            <canvas id="memorial-canvas" width="640" height="440"></canvas>
             <br>
-            <button onclick="downloadCanvas()">🖼️ イラストカードを保存する</button>
+            <button onclick="downloadCanvas()">🖼️ 記念イラストカードを保存する</button>
             <button onclick="closeModal()" style="background:#7f8c8d;">閉じる</button>
         </div>
     </div>
@@ -363,14 +347,20 @@
             'る','れ','ろ','わ','ん'
         ];
 
-        // 言語イラストマッピング辞書
-        const WORD_ILLUST_MAP = {
-            'ねこ': '🐱', 'いぬ': '🐶', 'さかな': '🐟', 'とり': '🐦', 'くま': '🐻', 'うさぎ': '🐰',
-            'すいか': '🍉', 'あいす': '🍦', 'りんご': '🍎', 'みかん': '🍊', 'いちご': '🍓', 'ぶどう': '🍇',
-            'すし': '🍣', 'あめ': '🍬', 'ぱん': '🍞', 'たまご': '🥚', 'らーめん': '🍜', 'けーき': '🎂',
-            'くるま': '🚗', 'ひこうき': '✈️', 'でんしゃ': '🚃', 'ふね': '🚢', 'ろけっと': '🚀', 'ばいく': '🏍️',
-            'はな': '🌸', 'ほし': '⭐', 'つき': '🌙', 'たいよう': '☀️', 'にじ': '🌈', 'うみ': '🌊',
-            'ほん': '📖', 'かさ': '☂️', 'くつ': '👟', 'とけい': '⏰', 'かばん': '🎒', 'ふうせん': '🎈'
+        // 単語ごとのキャラクター定義（顔・色・名前）
+        const CHARACTER_MAP = {
+            'さる': { emoji: '🐒', name: 'さる', color: '#e67e22', bodyColor: '#d35400' },
+            'きじ': { emoji: '🐦', name: 'きじ', color: '#2980b9', bodyColor: '#16a085' },
+            'らいおん': { emoji: '🦁', name: 'らいおん', color: '#f39c12', bodyColor: '#f1c40f' },
+            'ねこ': { emoji: '🐱', name: 'ねこ', color: '#e74c3c', bodyColor: '#ff7675' },
+            'いぬ': { emoji: '🐶', name: 'いぬ', color: '#d35400', bodyColor: '#e67e22' },
+            'さかな': { emoji: '🐟', name: 'さかな', color: '#3498db', bodyColor: '#74b9ff' },
+            'くま': { emoji: '🐻', name: 'くま', color: '#8e44ad', bodyColor: '#a29bfe' },
+            'うさぎ': { emoji: '🐰', name: 'うさぎ', color: '#fd79a8', bodyColor: '#e84393' },
+            'すいか': { emoji: '🍉', name: 'すいか', color: '#2ecc71', bodyColor: '#00b894' },
+            'あいす': { emoji: '🍦', name: 'あいす', color: '#74b9ff', bodyColor: '#0984e3' },
+            'りんご': { emoji: '🍎', name: 'りんご', color: '#ff7675', bodyColor: '#d63031' },
+            'くるま': { emoji: '🚗', name: 'くるま', color: '#e17055', bodyColor: '#d63031' }
         };
 
         let deck = [];
@@ -384,6 +374,7 @@
         let selectedIndex = null;
         let isTsumoSelected = false;
         let isGameOver = false;
+        let dragSourceIndex = null; // ドラッグ用
 
         function shuffle(array) {
             const shuffled = [...array];
@@ -396,7 +387,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof DICTIONARY !== 'undefined' && DICTIONARY.length > 0) {
-                setMessage(`単語辞書（${DICTIONARY.length}語）ロード完了！対局開始を押してください。`);
+                setMessage(`単語辞書（${DICTIONARY.length}語）ロード完了！「対局開始」を押してください。`);
             } else {
                 setMessage('⚠️ word.js が読み込めていません。');
             }
@@ -406,17 +397,14 @@
             if (typeof DICTIONARY === 'undefined' || DICTIONARY.length === 0) return;
 
             let allTiles = [];
-            // 46文字 × 2枚 ＝ 92枚
             HIRAGANA_LIST.forEach(char => {
                 allTiles.push(char, char);
-                // 母音やよく使われる文字を追加して山札が100枚以上になるように調整（全108枚）
                 if (['あ','い','う','え','お','か','き','く','し','て','と','り','ん','は','つ','ま'].includes(char)) {
                     allTiles.push(char);
                 }
             });
 
-            // ★ 山札を100枚に設定
-            deck = shuffle(allTiles).slice(0, 100);
+            deck = shuffle(allTiles).slice(0, 100); // 100枚の山札
             isGameOver = false;
 
             players.forEach(p => {
@@ -433,7 +421,7 @@
             document.getElementById('btn-sort').disabled = false;
             document.getElementById('btn-agari').disabled = false;
 
-            setMessage('ゲーム開始！あなたのターンです。ツモりました。');
+            setMessage('ゲーム開始！手牌はクリックまたはドラッグで自由に並び替えられます。');
             startTurn();
         }
 
@@ -453,7 +441,7 @@
                 setMessage(`${currentPlayer.name} の思考中...`);
                 setTimeout(() => cpuPlay(currentPlayer), 1000);
             } else {
-                setMessage('あなたの番です。捨てる牌を選んで「打牌」してください。');
+                setMessage('あなたの番です。打牌する牌を選ぶか、手牌の場所を入れ替えられます。');
             }
         }
 
@@ -486,17 +474,77 @@
             startTurn();
         }
 
-        function selectHandTile(index) {
-            if (turn !== 0 || isGameOver) return;
-            selectedIndex = index;
+        // --- 🖐️ 手牌選択 & 手動入れ替えロジック ---
+        function handleTileClick(index) {
+            if (isGameOver) return;
+            const p = players[0];
+
+            // 1. ツモ牌が選択された状態で手牌をクリック -> ツモ牌と交換
+            if (isTsumoSelected) {
+                const temp = p.hand[index];
+                p.hand[index] = p.tsumo;
+                p.tsumo = temp;
+                isTsumoSelected = false;
+                selectedIndex = null;
+                updateUI();
+                return;
+            }
+
+            // 2. すでに手牌のどれかが選択されていて、別の手牌をクリック -> 2枚の位置を入れ替え
+            if (selectedIndex !== null && selectedIndex !== index) {
+                const temp = p.hand[selectedIndex];
+                p.hand[selectedIndex] = p.hand[index];
+                p.hand[index] = temp;
+                selectedIndex = null;
+                updateUI();
+                return;
+            }
+
+            // 3. 選択の切替
+            if (selectedIndex === index) {
+                selectedIndex = null; // 解除
+            } else {
+                selectedIndex = index;
+            }
             isTsumoSelected = false;
             updateUI();
         }
 
-        function selectTsumoTile() {
-            if (turn !== 0 || isGameOver) return;
+        function handleTsumoClick() {
+            if (isGameOver) return;
+            if (selectedIndex !== null) {
+                // 手牌選択中にツモ牌をクリック -> 位置交換
+                const p = players[0];
+                const temp = p.hand[selectedIndex];
+                p.hand[selectedIndex] = p.tsumo;
+                p.tsumo = temp;
+                selectedIndex = null;
+                isTsumoSelected = false;
+            } else {
+                isTsumoSelected = !isTsumoSelected;
+            }
+            updateUI();
+        }
+
+        // --- 🖐️ ドラッグ＆ドロップ機能 ---
+        function handleDragStart(e, index) {
+            dragSourceIndex = index;
+            e.dataTransfer.setData('text/plain', index);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // ドロップを許可
+        }
+
+        function handleDrop(e, targetIndex) {
+            e.preventDefault();
+            if (dragSourceIndex === null || dragSourceIndex === targetIndex) return;
+            const p = players[0];
+            const temp = p.hand[dragSourceIndex];
+            p.hand[dragSourceIndex] = p.hand[targetIndex];
+            p.hand[targetIndex] = temp;
+            dragSourceIndex = null;
             selectedIndex = null;
-            isTsumoSelected = true;
             updateUI();
         }
 
@@ -617,6 +665,7 @@
                 }
             });
 
+            // プレイヤー手牌（ドラッグ＆ドロップ ＆ クリック対応）
             const p = players[0];
             const pHandDiv = document.getElementById('hand-player');
             pHandDiv.innerHTML = '';
@@ -624,7 +673,11 @@
                 const tile = document.createElement('div');
                 tile.className = `tile ${selectedIndex === idx ? 'selected' : ''}`;
                 tile.innerText = char;
-                tile.onclick = () => selectHandTile(idx);
+                tile.draggable = true;
+                tile.onclick = () => handleTileClick(idx);
+                tile.ondragstart = (e) => handleDragStart(e, idx);
+                tile.ondragover = (e) => handleDragOver(e);
+                tile.ondrop = (e) => handleDrop(e, idx);
                 pHandDiv.appendChild(tile);
             });
 
@@ -634,7 +687,7 @@
                 const tile = document.createElement('div');
                 tile.className = `tile ${isTsumoSelected ? 'selected' : ''}`;
                 tile.innerText = p.tsumo;
-                tile.onclick = selectTsumoTile;
+                tile.onclick = handleTsumoClick;
                 pTsumoDiv.appendChild(tile);
             }
 
@@ -657,104 +710,192 @@
             document.getElementById('message-box').innerText = msg;
         }
 
+        // --- 🎨 仲間たちが肩を組んで大喜びしている記念イラスト生成 (Canvas) ---
         function showMemorialModal(words, head, winnerName) {
             const modal = document.getElementById('modal');
-            document.getElementById('modal-title').innerText = `🎉 ${winnerName} の勝ち！`;
+            document.getElementById('modal-title').innerText = `🎉 ${winnerName} の大勝利！`;
             modal.style.display = 'flex';
 
             const canvas = document.getElementById('memorial-canvas');
             const ctx = canvas.getContext('2d');
 
-            const grad = ctx.createLinearGradient(0, 0, 600, 420);
-            grad.addColorStop(0, '#f1c40f');
-            grad.addColorStop(0.5, '#e67e22');
-            grad.addColorStop(1, '#e74c3c');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 600, 420);
+            // 1. 青空と青々とした野原の背景を描画
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, 300);
+            skyGrad.addColorStop(0, '#74b9ff');
+            skyGrad.addColorStop(1, '#dfe6e9');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, 640, 440);
 
-            const confettiColors = ['#ffffff', '#ffeaa7', '#74b9ff', '#55efc4', '#fd79a8'];
-            for (let i = 0; i < 35; i++) {
-                ctx.fillStyle = confettiColors[i % confettiColors.length];
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.arc((i * 37) % 600, (i * 29) % 420, (i % 5) * 4 + 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1.0;
-
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(12, 12, 576, 396);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '900 26px "M PLUS Rounded 1c", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 8;
-            ctx.fillText('🀄️ ひらがなドンジャラ 完成イラストカード 🀄️', 300, 52);
-
+            // 太陽と光
             ctx.fillStyle = '#ffeaa7';
-            ctx.font = 'bold 20px sans-serif';
-            ctx.fillText(`🏆 勝者：${winnerName} 🏆`, 300, 85);
-
-            const totalItems = words.length;
-            const startY = 120;
-            const cardHeight = Math.min(80, 220 / totalItems);
-
-            words.forEach((word, index) => {
-                const y = startY + index * (cardHeight + 15);
-                const illust = WORD_ILLUST_MAP[word] || '✨';
-
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                ctx.shadowBlur = 6;
-                ctx.beginPath();
-                ctx.roundRect(80, y, 440, cardHeight, 16);
-                ctx.fill();
-
-                const badgeRadius = cardHeight * 0.38;
-                const badgeX = 125;
-                const badgeY = y + cardHeight / 2;
-
-                ctx.fillStyle = '#ff7675';
-                ctx.beginPath();
-                ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.font = `${cardHeight * 0.55}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowBlur = 0;
-                ctx.fillText(illust, badgeX, badgeY + 2);
-
-                ctx.fillStyle = '#2c3e50';
-                ctx.font = `bold ${cardHeight * 0.42}px "M PLUS Rounded 1c", sans-serif`;
-                ctx.textAlign = 'left';
-                ctx.fillText(word, 175, badgeY);
-
-                ctx.font = `bold ${cardHeight * 0.3}px sans-serif`;
-                ctx.fillStyle = '#e67e22';
-                ctx.textAlign = 'right';
-                ctx.fillText('【完成】', 500, badgeY);
-            });
-
-            const headY = startY + words.length * (cardHeight + 15) + 10;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.beginPath();
-            ctx.roundRect(180, headY, 240, 45, 12);
+            ctx.arc(580, 60, 50, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = '#27ae60';
+            // 虹の描画
+            const rainbowColors = ['#ff7675', '#fdcb6e', '#55efc4', '#74b9ff', '#a29bfe'];
+            rainbowColors.forEach((color, i) => {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.arc(320, 380, 280 - i * 7, Math.PI, 0, false);
+                ctx.stroke();
+            });
+
+            // 緑の野原（地面）
+            const hillGrad = ctx.createLinearGradient(0, 280, 0, 440);
+            hillGrad.addColorStop(0, '#55efc4');
+            hillGrad.addColorStop(1, '#00b894');
+            ctx.fillStyle = hillGrad;
+            ctx.beginPath();
+            ctx.ellipse(320, 380, 380, 120, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 紙吹雪
+            const confettiColors = ['#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#ffffff'];
+            for (let i = 0; i < 40; i++) {
+                ctx.fillStyle = confettiColors[i % confettiColors.length];
+                ctx.beginPath();
+                ctx.arc((i * 41) % 640, (i * 31) % 250, (i % 4) + 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 外枠
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(10, 10, 620, 420);
+
+            // タイトル
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 24px "M PLUS Rounded 1c", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(255,255,255,0.8)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(`🏆 ${winnerName} のあがり記念カード 🏆`, 320, 45);
+
+            // 2. 登場キャラクター（言葉）の決定
+            const charList = words.map(w => CHARACTER_MAP[w] || { emoji: '✨', name: w, color: '#e74c3c', bodyColor: '#ff7675' });
+            const count = charList.length;
+
+            // キャラクターたちの配置計算
+            const startX = 320 - (count - 1) * 90;
+            const bodyY = 270;
+
+            // --- ✨ 肩を組む腕（手をつなぐ曲線）を先に描画 ---
+            if (count > 1) {
+                ctx.strokeStyle = '#d35400';
+                ctx.lineWidth = 12;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                for (let i = 0; i < count - 1; i++) {
+                    const x1 = startX + i * 180;
+                    const x2 = startX + (i + 1) * 180;
+                    // 隣のキャラと肩を組みあう太いアームライン
+                    ctx.moveTo(x1, bodyY - 10);
+                    ctx.quadraticCurveTo((x1 + x2) / 2, bodyY - 35, x2, bodyY - 10);
+                }
+                ctx.stroke();
+
+                // 袖/服のカラーライン
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+            }
+
+            // --- キャラクター本 __ 描画 ---
+            charList.forEach((charInfo, i) => {
+                const x = startX + i * 180;
+
+                // 胴体（ポップな服）
+                ctx.fillStyle = charInfo.bodyColor;
+                ctx.beginPath();
+                ctx.arc(x, bodyY + 30, 42, Math.PI, 0, false);
+                ctx.fill();
+
+                // 顔（丸い顔）
+                ctx.fillStyle = '#ffeaa7';
+                ctx.beginPath();
+                ctx.arc(x, bodyY - 20, 48, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#fdcb6e';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // 笑顔の表情（にっこり目 ＆ 大口で笑う）
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+
+                // 左目 ^
+                ctx.beginPath();
+                ctx.arc(x - 18, bodyY - 28, 10, Math.PI * 1.1, Math.PI * 1.9);
+                ctx.stroke();
+                // 右目 ^
+                ctx.beginPath();
+                ctx.arc(x + 18, bodyY - 28, 10, Math.PI * 1.1, Math.PI * 1.9);
+                ctx.stroke();
+
+                // 口（笑う大口 ▽）
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(x, bodyY - 15, 18, 0, Math.PI, false);
+                ctx.fill();
+
+                // ほっぺ（ピンクの丸）
+                ctx.fillStyle = 'rgba(255, 118, 117, 0.6)';
+                ctx.beginPath();
+                ctx.arc(x - 28, bodyY - 12, 10, 0, Math.PI * 2);
+                ctx.arc(x + 28, bodyY - 12, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                // キャラクターアイコン（頭の上の帽子風）
+                ctx.font = '36px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(charInfo.emoji, x, bodyY - 75);
+
+                // 胸元の言葉リボンバッジ（「さる」「きじ」「らいおん」など）
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 4;
+                ctx.beginPath();
+                ctx.roundRect(x - 65, bodyY + 30, 130, 36, 12);
+                ctx.fill();
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 20px "M PLUS Rounded 1c", sans-serif';
+                ctx.shadowBlur = 0;
+                ctx.fillText(charInfo.name, x, bodyY + 48);
+            });
+
+            // 3. アタマ（ペア）風船の描画
+            const balloonX = 550;
+            const balloonY = 120;
+
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.ellipse(balloonX, balloonY, 50, 40, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 紐
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(balloonX, balloonY + 40);
+            ctx.lineTo(balloonX - 10, balloonY + 90);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 18px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`アタマ(ペア):  【 ${head}  ${head} 】`, 300, headY + 23);
+            ctx.fillText(`ペア: ${head}${head}`, balloonX, balloonY);
         }
 
         function downloadCanvas() {
             const canvas = document.getElementById('memorial-canvas');
             const link = document.createElement('a');
-            link.download = 'ひらがなドンジャラ_完成イラストカード.png';
+            link.download = 'ひらがなドンジャラ_肩組み記念カード.png';
             link.href = canvas.toDataURL();
             link.click();
         }
