@@ -53,22 +53,6 @@
             align-items: center;
             gap: 6px;
         }
-        .guide-example {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-top: 5px;
-            flex-wrap: wrap;
-        }
-        .badge {
-            background: #e74c3c;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .badge-head { background: #27ae60; }
 
         .game-board {
             width: 100%;
@@ -100,6 +84,7 @@
             font-weight: bold;
             margin-bottom: 4px;
             border: 1px solid #f1c40f;
+            color: #fff;
         }
         .player-tag.active {
             background: #f1c40f;
@@ -195,19 +180,24 @@
         .hand-vertical { display: flex; flex-direction: column; gap: 2px; }
         .hand-horizontal { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
 
-        .controls { display: flex; gap: 8px; margin-top: 8px; }
+        .controls { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; justify-content: center; align-items: center; }
 
-        button {
+        select, button {
             background: linear-gradient(to bottom, #ff7675, #d63031);
             border: 2px solid #fff;
             color: white;
-            padding: 8px 16px;
-            font-size: 0.95rem;
+            padding: 8px 12px;
+            font-size: 0.9rem;
             font-weight: bold;
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: all 0.1s;
+        }
+        select {
+            background: #ffffff;
+            color: #2c3e50;
+            outline: none;
         }
         button:hover { transform: scale(1.05); }
         button:disabled {
@@ -283,42 +273,50 @@
     <h1>🀄️ ひらがなドンジャラ</h1>
 
     <div class="guide-box">
-        <div class="guide-title">💡 あがりのルール＆AI生成機能</div>
+        <div class="guide-title">💡 あがりのルール ＆ 人数設定</div>
         言葉 ＋ 言葉 ＋ ... ＋ 同じ文字2枚（アタマ）で上がり！<br>
-        🎨 あがると、できた言葉（例：さる・きじ・らいおん）の仲間たちが**肩を組んで笑っているリアルAIイラスト**が生成されます！
+        👨‍👩‍👧‍👦 <b>人数選択：</b>1人（vs CPU3体）〜 最大4人（人間同士で対戦）を選択して遊べます！
     </div>
 
     <div class="message-box" id="message-box">「対局開始」を押すとゲームが始まります！</div>
 
     <div class="game-board">
         <div class="player-top">
-            <div class="player-tag" id="tag-cpu2">🤖 対面 (CPU2)</div>
-            <div id="hand-cpu2" class="hand-horizontal"></div>
+            <div class="player-tag" id="tag-p2">🤖 CPU2</div>
+            <div id="hand-p2" class="hand-horizontal"></div>
         </div>
         <div class="player-left">
-            <div class="player-tag" id="tag-cpu1">🤖 上家 (CPU1)</div>
-            <div id="hand-cpu1" class="hand-vertical"></div>
+            <div class="player-tag" id="tag-p1">🤖 CPU1</div>
+            <div id="hand-p1" class="hand-vertical"></div>
         </div>
         <div class="center-table">
             <div class="deck-info">山札: <span id="deck-count">0</span> 枚</div>
             <div class="discard-grid">
-                <div class="discard-zone" id="discard-cpu1"></div>
-                <div class="discard-zone" id="discard-cpu2"></div>
-                <div class="discard-zone" id="discard-cpu3"></div>
-                <div class="discard-zone" id="discard-player"></div>
+                <div class="discard-zone" id="discard-p1"></div>
+                <div class="discard-zone" id="discard-p2"></div>
+                <div class="discard-zone" id="discard-p3"></div>
+                <div class="discard-zone" id="discard-p0"></div>
             </div>
         </div>
         <div class="player-right">
-            <div class="player-tag" id="tag-cpu3">🤖 下家 (CPU3)</div>
-            <div id="hand-cpu3" class="hand-vertical"></div>
+            <div class="player-tag" id="tag-p3">🤖 CPU3</div>
+            <div id="hand-p3" class="hand-vertical"></div>
         </div>
         <div class="player-bottom">
-            <div class="player-tag" id="tag-player">👤 あなた</div>
+            <div class="player-tag" id="tag-p0">👤 プレイヤー1</div>
             <div style="display:flex; align-items:center; gap: 15px;">
-                <div id="hand-player" class="hand-horizontal"></div>
-                <div id="tsumo-player"></div>
+                <div id="hand-active" class="hand-horizontal"></div>
+                <div id="tsumo-active"></div>
             </div>
             <div class="controls">
+                <label style="color:#ffeaa7; font-size:0.85rem; font-weight:bold;">人間人数:
+                    <select id="select-human-count">
+                        <option value="1">1人 (vs CPU3体)</option>
+                        <option value="2">2人 (人間2+CPU2)</option>
+                        <option value="3">3人 (人間3+CPU1)</option>
+                        <option value="4">4人 (人間4人対戦)</option>
+                    </select>
+                </label>
                 <button id="btn-start" onclick="startGame()">対局開始</button>
                 <button id="btn-discard" onclick="discardSelected()" disabled>打牌（捨てる）</button>
                 <button id="btn-sort" onclick="sortHand()" disabled>理牌（並べる）</button>
@@ -332,16 +330,15 @@
         <div class="modal-content">
             <h2 id="modal-title" style="color: #e67e22;">🎉 おめでとうございます！</h2>
             
-            <!-- AI画像生成中のローディング画面 -->
             <div id="loading-box" class="loading-spinner">
                 <div class="spinner"></div>
-                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 画像生成AIが「言葉の仲間たち」を描いています...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
+                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 画像生成AIが「言葉のイメージイラスト」を描いています...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
             </div>
 
             <canvas id="memorial-canvas" width="640" height="460" style="display:none;"></canvas>
             <br>
             <div id="modal-buttons" style="display:none;">
-                <button onclick="downloadCanvas()">🖼️ リアル記念イラストカードを保存</button>
+                <button onclick="downloadCanvas()">🖼️ 記念イラストカードを保存</button>
                 <button onclick="closeModal()" style="background:#7f8c8d;">閉じる</button>
             </div>
         </div>
@@ -356,23 +353,18 @@
             'る','れ','ろ','わ','ん'
         ];
 
-        // 英語プロンプト変換用辞書（AIへ送信するため）
+        // AI画像プロンプト変換用単語辞書
         const WORD_ENGLISH_MAP = {
-            'さる': 'monkey', 'きじ': 'pheasant', 'らいおん': 'lion',
-            'ねこ': 'cute cat', 'いぬ': 'cute dog', 'さかな': 'colorful fish',
-            'くま': 'bear', 'うさぎ': 'rabbit', 'すいか': 'watermelon',
-            'あいす': 'ice cream', 'りんご': 'apple', 'くるま': 'toy car',
-            'とり': 'bird', 'きつね': 'fox', 'たぬき': 'raccoon dog',
-            'ぺんぎん': 'penguin', 'ぱんだ': 'panda', 'ぞう': 'elephant'
+            'さる': 'cute monkey', 'きじ': 'colorful pheasant bird', 'らいおん': 'majestic lion',
+            'ねこ': 'adorable fluffy cat', 'いぬ': 'cute dog', 'さかな': 'bright swimming fish',
+            'くま': 'cute teddy bear', 'うさぎ': 'cute white rabbit', 'すいか': 'fresh juicy watermelon',
+            'あいす': 'delicious ice cream', 'りんご': 'red shiny apple', 'くるま': 'cool toy car',
+            'とり': 'pretty bird', 'きつね': 'cute fox', 'たぬき': 'cute raccoon dog',
+            'ぺんぎん': 'cute penguin', 'ぱんだ': 'cute panda', 'ぞう': 'friendly elephant'
         };
 
         let deck = [];
-        let players = [
-            { id: 0, name: 'あなた', hand: [], tsumo: null, discards: [], isCpu: false },
-            { id: 1, name: 'CPU1', hand: [], tsumo: null, discards: [], isCpu: true },
-            { id: 2, name: 'CPU2', hand: [], tsumo: null, discards: [], isCpu: true },
-            { id: 3, name: 'CPU3', hand: [], tsumo: null, discards: [], isCpu: true }
-        ];
+        let players = [];
         let turn = 0;
         let selectedIndex = null;
         let isTsumoSelected = false;
@@ -399,6 +391,16 @@
         function startGame() {
             if (typeof DICTIONARY === 'undefined' || DICTIONARY.length === 0) return;
 
+            const humanCount = parseInt(document.getElementById('select-human-count').value, 10);
+
+            // プレイヤー構成の初期化 (0:下, 1:左, 2:上, 3:右)
+            players = [
+                { id: 0, name: 'プレイヤー1', hand: [], tsumo: null, discards: [], isCpu: false },
+                { id: 1, name: humanCount >= 2 ? 'プレイヤー2' : 'CPU1', hand: [], tsumo: null, discards: [], isCpu: humanCount < 2 },
+                { id: 2, name: humanCount >= 3 ? 'プレイヤー3' : 'CPU2', hand: [], tsumo: null, discards: [], isCpu: humanCount < 3 },
+                { id: 3, name: humanCount >= 4 ? 'プレイヤー4' : 'CPU3', hand: [], tsumo: null, discards: [], isCpu: humanCount < 4 }
+            ];
+
             let allTiles = [];
             HIRAGANA_LIST.forEach(char => {
                 allTiles.push(char, char);
@@ -424,7 +426,7 @@
             document.getElementById('btn-sort').disabled = false;
             document.getElementById('btn-agari').disabled = false;
 
-            setMessage('ゲーム開始！手牌はクリックまたはドラッグで自由に並び替えられます。');
+            setMessage(`対局開始！（${humanCount}人プレイ） 最初の順番は ${players[0].name} です。`);
             startTurn();
         }
 
@@ -438,13 +440,15 @@
 
             const currentPlayer = players[turn];
             currentPlayer.tsumo = deck.pop();
+            selectedIndex = null;
+            isTsumoSelected = false;
             updateUI();
 
             if (currentPlayer.isCpu) {
                 setMessage(`${currentPlayer.name} の思考中...`);
                 setTimeout(() => cpuPlay(currentPlayer), 1000);
             } else {
-                setMessage('あなたの番です。捨てる牌を選択するか、ドラッグで並び替えられます。');
+                setMessage(`【${currentPlayer.name} の番】 捨てる牌を選んで「打牌」してください。`);
             }
         }
 
@@ -478,8 +482,8 @@
         }
 
         function handleTileClick(index) {
-            if (isGameOver) return;
-            const p = players[0];
+            if (isGameOver || players[turn].isCpu) return;
+            const p = players[turn];
 
             if (isTsumoSelected) {
                 const temp = p.hand[index];
@@ -510,9 +514,9 @@
         }
 
         function handleTsumoClick() {
-            if (isGameOver) return;
+            if (isGameOver || players[turn].isCpu) return;
+            const p = players[turn];
             if (selectedIndex !== null) {
-                const p = players[0];
                 const temp = p.hand[selectedIndex];
                 p.hand[selectedIndex] = p.tsumo;
                 p.tsumo = temp;
@@ -533,8 +537,8 @@
 
         function handleDrop(e, targetIndex) {
             e.preventDefault();
-            if (dragSourceIndex === null || dragSourceIndex === targetIndex) return;
-            const p = players[0];
+            if (dragSourceIndex === null || dragSourceIndex === targetIndex || players[turn].isCpu) return;
+            const p = players[turn];
             const temp = p.hand[dragSourceIndex];
             p.hand[dragSourceIndex] = p.hand[targetIndex];
             p.hand[targetIndex] = temp;
@@ -544,8 +548,8 @@
         }
 
         function discardSelected() {
-            if (turn !== 0 || isGameOver) return;
-            const p = players[0];
+            const p = players[turn];
+            if (p.isCpu || isGameOver) return;
 
             if (isTsumoSelected) {
                 p.discards.push(p.tsumo);
@@ -565,22 +569,26 @@
         }
 
         function sortHand() {
-            players[0].hand.sort((a, b) => HIRAGANA_LIST.indexOf(a) - HIRAGANA_LIST.indexOf(b));
+            const p = players[turn];
+            if (p.isCpu || isGameOver) return;
+            p.hand.sort((a, b) => HIRAGANA_LIST.indexOf(a) - HIRAGANA_LIST.indexOf(b));
             selectedIndex = null;
             updateUI();
         }
 
         function checkAgari(isManual = false) {
-            const p = players[0];
+            const p = players[turn];
+            if (p.isCpu) return;
+
             const allChars = [...p.hand];
             if (p.tsumo) allChars.push(p.tsumo);
 
             const result = checkAgariLogic(allChars);
 
             if (result) {
-                setMessage(`🎉 アガリ！！ 完成言葉：${result.words.join(' / ')}`);
+                setMessage(`🎉 ${p.name} がアガりました！！ 完成言葉：${result.words.join(' / ')}`);
                 isGameOver = true;
-                showMemorialModal(result.words, result.head, 'あなた');
+                showMemorialModal(result.words, result.head, p.name);
             } else if (isManual) {
                 setMessage('❌ まだアガリの形（言葉＋言葉...＋同じ文字2枚）になっていません！');
             }
@@ -637,57 +645,80 @@
         function updateUI() {
             document.getElementById('deck-count').innerText = deck.length;
 
+            if (players.length === 0) return;
+
+            // 各プレイヤーのタグ更新
             for (let i = 0; i < 4; i++) {
-                const tagId = i === 0 ? 'tag-player' : `tag-cpu${i}`;
-                const tagEl = document.getElementById(tagId);
+                const tagEl = document.getElementById(`tag-p${i}`);
+                const player = players[i];
+                tagEl.innerText = `${player.isCpu ? '🤖' : '👤'} ${player.name}`;
                 if (turn === i && !isGameOver) tagEl.classList.add('active');
                 else tagEl.classList.remove('active');
             }
 
+            // 周囲のプレイヤー（1:左, 2:上, 3:右）の手牌を描画（裏向き表示）
             [1, 2, 3].forEach(id => {
-                const cpu = players[id];
-                const cpuHandDiv = document.getElementById(`hand-cpu${id}`);
-                cpuHandDiv.innerHTML = '';
-                cpu.hand.forEach(() => {
+                const player = players[id];
+                const handDiv = document.getElementById(`hand-p${id}`);
+                handDiv.innerHTML = '';
+                player.hand.forEach(() => {
                     const tile = document.createElement('div');
                     tile.className = 'tile back small';
-                    cpuHandDiv.appendChild(tile);
+                    handDiv.appendChild(tile);
                 });
-                if (cpu.tsumo) {
+                if (player.tsumo) {
                     const tile = document.createElement('div');
                     tile.className = 'tile back small';
-                    cpuHandDiv.appendChild(tile);
+                    handDiv.appendChild(tile);
                 }
             });
 
-            const p = players[0];
-            const pHandDiv = document.getElementById('hand-player');
-            pHandDiv.innerHTML = '';
-            p.hand.forEach((char, idx) => {
-                const tile = document.createElement('div');
-                tile.className = `tile ${selectedIndex === idx ? 'selected' : ''}`;
-                tile.innerText = char;
-                tile.draggable = true;
-                tile.onclick = () => handleTileClick(idx);
-                tile.ondragstart = (e) => handleDragStart(e, idx);
-                tile.ondragover = (e) => handleDragOver(e);
-                tile.ondrop = (e) => handleDrop(e, idx);
-                pHandDiv.appendChild(tile);
-            });
+            // 現在のターンが人間の場合は、その人の手牌を表向き描画
+            const activePlayer = players[turn];
+            const p0Tag = document.getElementById('tag-p0');
+            p0Tag.innerText = `${activePlayer.isCpu ? '🤖' : '👤'} 操作中: ${activePlayer.name}`;
 
-            const pTsumoDiv = document.getElementById('tsumo-player');
-            pTsumoDiv.innerHTML = '';
-            if (p.tsumo) {
-                const tile = document.createElement('div');
-                tile.className = `tile ${isTsumoSelected ? 'selected' : ''}`;
-                tile.innerText = p.tsumo;
-                tile.onclick = handleTsumoClick;
-                pTsumoDiv.appendChild(tile);
+            const activeHandDiv = document.getElementById('hand-active');
+            activeHandDiv.innerHTML = '';
+
+            if (!activePlayer.isCpu) {
+                activePlayer.hand.forEach((char, idx) => {
+                    const tile = document.createElement('div');
+                    tile.className = `tile ${selectedIndex === idx ? 'selected' : ''}`;
+                    tile.innerText = char;
+                    tile.draggable = true;
+                    tile.onclick = () => handleTileClick(idx);
+                    tile.ondragstart = (e) => handleDragStart(e, idx);
+                    tile.ondragover = (e) => handleDragOver(e);
+                    tile.ondrop = (e) => handleDrop(e, idx);
+                    activeHandDiv.appendChild(tile);
+                });
+            } else {
+                // CPUのターンは裏向きで表示
+                activePlayer.hand.forEach(() => {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile back';
+                    activeHandDiv.appendChild(tile);
+                });
             }
 
+            const activeTsumoDiv = document.getElementById('tsumo-active');
+            activeTsumoDiv.innerHTML = '';
+            if (activePlayer.tsumo) {
+                const tile = document.createElement('div');
+                if (!activePlayer.isCpu) {
+                    tile.className = `tile ${isTsumoSelected ? 'selected' : ''}`;
+                    tile.innerText = activePlayer.tsumo;
+                    tile.onclick = handleTsumoClick;
+                } else {
+                    tile.className = 'tile back';
+                }
+                activeTsumoDiv.appendChild(tile);
+            }
+
+            // 捨て牌（河）の更新
             players.forEach((player, idx) => {
-                const targetId = idx === 0 ? 'discard-player' : `discard-cpu${idx}`;
-                const zone = document.getElementById(targetId);
+                const zone = document.getElementById(`discard-p${idx}`);
                 zone.innerHTML = '';
                 player.discards.forEach(char => {
                     const tile = document.createElement('div');
@@ -697,58 +728,57 @@
                 });
             });
 
-            document.getElementById('btn-discard').disabled = (turn !== 0 || p.tsumo === null || (selectedIndex === null && !isTsumoSelected) || isGameOver);
+            document.getElementById('btn-discard').disabled = (activePlayer.isCpu || activePlayer.tsumo === null || (selectedIndex === null && !isTsumoSelected) || isGameOver);
         }
 
         function setMessage(msg) {
             document.getElementById('message-box').innerText = msg;
         }
 
-        // --- 🤖 リアルAI画像生成 ＆ Canvasカード合成ロジック ---
+        // --- 🎨 単語のイメージに直結したリアルAI画像生成 ＆ Canvas合成 ---
         async function showMemorialModal(words, head, winnerName) {
             const modal = document.getElementById('modal');
             const loadingBox = document.getElementById('loading-box');
             const canvas = document.getElementById('memorial-canvas');
             const buttons = document.getElementById('modal-buttons');
 
-            document.getElementById('modal-title').innerText = `🎉 ${winnerName} の勝ち！`;
+            document.getElementById('modal-title').innerText = `🎉 ${winnerName} の大勝利！`;
             modal.style.display = 'flex';
             loadingBox.style.display = 'flex';
             canvas.style.display = 'none';
             buttons.style.display = 'none';
 
-            // 1. 完成した言葉からAIイラスト生成用プロンプト（英語）を作成
+            // 1. 完成言葉（例：さる・きじ・らいおん）の英語プロンプトを組み立て
             const englishSubjects = words.map(w => WORD_ENGLISH_MAP[w] || w).join(', ');
-            const promptText = `A vibrant and high quality cute anime digital illustration of ${englishSubjects} putting their arms around each other's shoulders, laughing brightly and smiling together, best friends, happy, detailed, colorful background`;
+            
+            // 自然でクオリティが高いデジタルアートプロンプト
+            const promptText = `A vibrant, high quality, charming anime digital illustration featuring ${englishSubjects} together in a bright colorful magical scene, detailed, beautiful background, adorable masterpiece`;
             const encodedPrompt = encodeURIComponent(promptText);
             
-            // Pollinations AI（完全無料・APIキー不要の画像生成API）のURLを生成
             const randomSeed = Math.floor(Math.random() * 1000);
             const aiImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=600&height=320&nologo=true&seed=${randomSeed}`;
 
             try {
-                // 2. CORS制限を回避するために fetch で画像 Blob データを取得
+                // 2. Fetch BlobでCORSを回避して安全取得
                 const response = await fetch(aiImageUrl);
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
 
-                // 3. 画像オブジェクトを作成してロード
                 const img = new Image();
                 img.src = blobUrl;
                 img.onload = () => {
-                    // 4. Canvasへの描画処理
                     const ctx = canvas.getContext('2d');
 
-                    // カードの背景枠
+                    // カード枠
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, 640, 460);
 
-                    // AI生成画像をの中央に合成
+                    // AI生成画像
                     ctx.drawImage(img, 20, 75, 600, 320);
 
-                    // 上部ヘッダー装飾
+                    // ヘッダーデザイン
                     const grad = ctx.createLinearGradient(0, 0, 640, 0);
-                    grad.addColorStop(0, '#f1c40f');
+                    grad.addColorStop(0, '#f39c12');
                     grad.addColorStop(1, '#e67e22');
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, 640, 65);
@@ -756,29 +786,27 @@
                     ctx.fillStyle = '#ffffff';
                     ctx.font = '900 22px "M PLUS Rounded 1c", sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText(`🀄️ 完成記念カード (言葉: ${words.join(' / ')})`, 320, 40);
+                    ctx.fillText(`🀄️ 完成記念カード (${words.join(' / ')})`, 320, 40);
 
-                    // 下部：完成言葉 ＆ アタマ表示エリア
+                    // フッターデザイン
                     ctx.fillStyle = '#2c3e50';
                     ctx.fillRect(0, 400, 640, 60);
 
                     ctx.fillStyle = '#ffeaa7';
                     ctx.font = 'bold 18px sans-serif';
-                    ctx.fillText(`✨ 揃えた言葉: ${words.join(' + ')}  |  ペア: 【${head}${head}】 ✨`, 320, 435);
+                    ctx.fillText(`🏆 勝者: ${winnerName}  |  言葉: ${words.join(' + ')}  |  ペア: 【${head}${head}】`, 320, 435);
 
-                    // ゴールドの外枠
                     ctx.strokeStyle = '#f39c12';
                     ctx.lineWidth = 8;
                     ctx.strokeRect(4, 4, 632, 452);
 
-                    // UIの表示切替
                     loadingBox.style.display = 'none';
                     canvas.style.display = 'block';
                     buttons.style.display = 'block';
                 };
             } catch (err) {
                 console.error('画像生成エラー:', err);
-                alert('AIイラストの取得に失敗しました。ネットワーク環境をご確認ください。');
+                alert('AIイラストの生成に失敗しました。');
                 closeModal();
             }
         }
@@ -786,7 +814,7 @@
         function downloadCanvas() {
             const canvas = document.getElementById('memorial-canvas');
             const link = document.createElement('a');
-            link.download = 'ひらがなドンジャラ_AI記念イラスト.png';
+            link.download = 'ひらがなドンジャラ_記念カード.png';
             link.href = canvas.toDataURL();
             link.click();
         }
