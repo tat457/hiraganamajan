@@ -332,7 +332,7 @@
             
             <div id="loading-box" class="loading-spinner">
                 <div class="spinner"></div>
-                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 画像生成AIが「言葉のイメージイラスト」を描いています...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
+                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 AIがランダム構図でイラストを生成中...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
             </div>
 
             <canvas id="memorial-canvas" width="640" height="460" style="display:none;"></canvas>
@@ -355,13 +355,40 @@
 
         // AI画像プロンプト変換用単語辞書
         const WORD_ENGLISH_MAP = {
-            'さる': 'cute monkey', 'きじ': 'colorful pheasant bird', 'らいおん': 'majestic lion',
-            'ねこ': 'adorable fluffy cat', 'いぬ': 'cute dog', 'さかな': 'bright swimming fish',
-            'くま': 'cute teddy bear', 'うさぎ': 'cute white rabbit', 'すいか': 'fresh juicy watermelon',
-            'あいす': 'delicious ice cream', 'りんご': 'red shiny apple', 'くるま': 'cool toy car',
-            'とり': 'pretty bird', 'きつね': 'cute fox', 'たぬき': 'cute raccoon dog',
-            'ぺんぎん': 'cute penguin', 'ぱんだ': 'cute panda', 'ぞう': 'friendly elephant'
+            'さる': 'monkey', 'きじ': 'pheasant bird', 'らいおん': 'lion',
+            'ねこ': 'cute cat', 'いぬ': 'friendly dog', 'さかな': 'bright colorful fish',
+            'くま': 'teddy bear', 'うさぎ': 'fluffy rabbit', 'すいか': 'watermelon',
+            'あいす': 'sweet ice cream', 'りんご': 'red apple', 'くるま': 'cool toy car',
+            'とり': 'flying bird', 'きつね': 'cute fox', 'たぬき': 'raccoon dog',
+            'ぺんぎん': 'penguin', 'ぱんだ': 'panda', 'ぞう': 'giant elephant'
         };
+
+        // 🎨 構図（アングル）・背景・スタイルのシャッフル用リスト
+        const COMPOSITIONS = [
+            'dynamic wide angle perspective, floating in the air',
+            'close-up portrait focus, playful poses',
+            'cinematic action shot, diagonal composition',
+            'storybook arrangement, surrounded by glowing magic',
+            'top-down overview, cute flat lay design',
+            'low angle shot looking up, grand scale'
+        ];
+
+        const BACKGROUNDS = [
+            'a magical starry night sky with shimmering lights',
+            'a lush fantasy forest under soft golden sunlight',
+            'a dreamlike sky full of floating colorful balloons and clouds',
+            'a vibrant fantasy land made of sweets and candy',
+            'a cozy bright room with confetti and ribbons',
+            'a cheerful flower meadow near a sparkling waterfall'
+        ];
+
+        const STYLES = [
+            'vibrant 3D animated movie render style',
+            'charming watercolor storybook illustration',
+            'bright pop-art anime digital artwork',
+            'soft pastel art style with delicate lighting',
+            'high detail paper-craft style 3D art'
+        ];
 
         let deck = [];
         let players = [];
@@ -393,7 +420,6 @@
 
             const humanCount = parseInt(document.getElementById('select-human-count').value, 10);
 
-            // プレイヤー構成の初期化 (0:下, 1:左, 2:上, 3:右)
             players = [
                 { id: 0, name: 'プレイヤー1', hand: [], tsumo: null, discards: [], isCpu: false },
                 { id: 1, name: humanCount >= 2 ? 'プレイヤー2' : 'CPU1', hand: [], tsumo: null, discards: [], isCpu: humanCount < 2 },
@@ -647,7 +673,6 @@
 
             if (players.length === 0) return;
 
-            // 各プレイヤーのタグ更新
             for (let i = 0; i < 4; i++) {
                 const tagEl = document.getElementById(`tag-p${i}`);
                 const player = players[i];
@@ -656,7 +681,6 @@
                 else tagEl.classList.remove('active');
             }
 
-            // 周囲のプレイヤー（1:左, 2:上, 3:右）の手牌を描画（裏向き表示）
             [1, 2, 3].forEach(id => {
                 const player = players[id];
                 const handDiv = document.getElementById(`hand-p${id}`);
@@ -673,7 +697,6 @@
                 }
             });
 
-            // 現在のターンが人間の場合は、その人の手牌を表向き描画
             const activePlayer = players[turn];
             const p0Tag = document.getElementById('tag-p0');
             p0Tag.innerText = `${activePlayer.isCpu ? '🤖' : '👤'} 操作中: ${activePlayer.name}`;
@@ -694,7 +717,6 @@
                     activeHandDiv.appendChild(tile);
                 });
             } else {
-                // CPUのターンは裏向きで表示
                 activePlayer.hand.forEach(() => {
                     const tile = document.createElement('div');
                     tile.className = 'tile back';
@@ -716,7 +738,6 @@
                 activeTsumoDiv.appendChild(tile);
             }
 
-            // 捨て牌（河）の更新
             players.forEach((player, idx) => {
                 const zone = document.getElementById(`discard-p${idx}`);
                 zone.innerHTML = '';
@@ -735,7 +756,7 @@
             document.getElementById('message-box').innerText = msg;
         }
 
-        // --- 🎨 単語のイメージに直結したリアルAI画像生成 ＆ Canvas合成 ---
+        // --- 🎲 構図・アングル・スタイルをダイナミック抽出してAIイラストを生成 ---
         async function showMemorialModal(words, head, winnerName) {
             const modal = document.getElementById('modal');
             const loadingBox = document.getElementById('loading-box');
@@ -748,18 +769,22 @@
             canvas.style.display = 'none';
             buttons.style.display = 'none';
 
-            // 1. 完成言葉（例：さる・きじ・らいおん）の英語プロンプトを組み立て
+            // 1. 各要素をランダムに選定して変化を最大化
+            const randomComp = COMPOSITIONS[Math.floor(Math.random() * COMPOSITIONS.length)];
+            const randomBg = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
+            const randomStyle = STYLES[Math.floor(Math.random() * STYLES.length)];
+
             const englishSubjects = words.map(w => WORD_ENGLISH_MAP[w] || w).join(', ');
-            
-            // 自然でクオリティが高いデジタルアートプロンプト
-            const promptText = `A vibrant, high quality, charming anime digital illustration featuring ${englishSubjects} together in a bright colorful magical scene, detailed, beautiful background, adorable masterpiece`;
+
+            // プロンプトの組み立て
+            const promptText = `${randomStyle} of ${englishSubjects}, ${randomComp}, set in ${randomBg}, ultra-detailed, artistic masterpiece`;
             const encodedPrompt = encodeURIComponent(promptText);
             
-            const randomSeed = Math.floor(Math.random() * 1000);
+            // シード値も毎回完全ランダムにする
+            const randomSeed = Math.floor(Math.random() * 999999);
             const aiImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=600&height=320&nologo=true&seed=${randomSeed}`;
 
             try {
-                // 2. Fetch BlobでCORSを回避して安全取得
                 const response = await fetch(aiImageUrl);
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
@@ -769,11 +794,11 @@
                 img.onload = () => {
                     const ctx = canvas.getContext('2d');
 
-                    // カード枠
+                    // カード土台
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, 640, 460);
 
-                    // AI生成画像
+                    // AI画像描画
                     ctx.drawImage(img, 20, 75, 600, 320);
 
                     // ヘッダーデザイン
