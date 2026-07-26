@@ -332,7 +332,7 @@
             
             <div id="loading-box" class="loading-spinner">
                 <div class="spinner"></div>
-                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 AIがランダム構図でイラストを生成中...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
+                <p style="font-weight:bold; color:#d35400;" id="loading-text">🎨 言葉（動物・アイテム）のイラストを描いています...<br><small style="color:#7f8c8d;">(数秒お待ちください)</small></p>
             </div>
 
             <canvas id="memorial-canvas" width="640" height="460" style="display:none;"></canvas>
@@ -353,41 +353,52 @@
             'る','れ','ろ','わ','ん'
         ];
 
-        // AI画像プロンプト変換用単語辞書
+        // AI画像プロンプト変換用単語辞書（明確な動物・物体として指定）
         const WORD_ENGLISH_MAP = {
-            'さる': 'monkey', 'きじ': 'pheasant bird', 'らいおん': 'lion',
-            'ねこ': 'cute cat', 'いぬ': 'friendly dog', 'さかな': 'bright colorful fish',
-            'くま': 'teddy bear', 'うさぎ': 'fluffy rabbit', 'すいか': 'watermelon',
-            'あいす': 'sweet ice cream', 'りんご': 'red apple', 'くるま': 'cool toy car',
-            'とり': 'flying bird', 'きつね': 'cute fox', 'たぬき': 'raccoon dog',
-            'ぺんぎん': 'penguin', 'ぱんだ': 'panda', 'ぞう': 'giant elephant'
+            'さる': 'an adorable monkey animal', 
+            'きじ': 'a colorful pheasant bird', 
+            'らいおん': 'a majestic lion animal',
+            'ねこ': 'a fluffy cute cat animal', 
+            'いぬ': 'a friendly dog animal', 
+            'さかな': 'a bright swimming fish',
+            'くま': 'a cute bear animal', 
+            'うさぎ': 'a fluffy rabbit animal', 
+            'すいか': 'a fresh juicy watermelon fruit',
+            'あいす': 'a delicious ice cream dessert', 
+            'りんご': 'a red shiny apple fruit', 
+            'くるま': 'a cool toy car vehicle',
+            'とり': 'a pretty bird', 
+            'きつね': 'a cute fox animal', 
+            'たぬき': 'a cute raccoon dog animal',
+            'ぺんぎん': 'a cute penguin bird', 
+            'ぱんだ': 'a panda bear animal', 
+            'ぞう': 'a friendly elephant animal'
         };
 
-        // 🎨 構図（アングル）・背景・スタイルのシャッフル用リスト
+        // 人物排除＆アイテム・動物主体のプロンプト構成
         const COMPOSITIONS = [
-            'dynamic wide angle perspective, floating in the air',
-            'close-up portrait focus, playful poses',
-            'cinematic action shot, diagonal composition',
-            'storybook arrangement, surrounded by glowing magic',
-            'top-down overview, cute flat lay design',
-            'low angle shot looking up, grand scale'
+            'wide shot perspective, vibrant composition',
+            'dynamic center focus on the subjects',
+            'playful layout, surrounded by glowing elements',
+            'top-down overview, colorful flat lay design',
+            'cinematic scene, balanced art layout'
         ];
 
         const BACKGROUNDS = [
             'a magical starry night sky with shimmering lights',
-            'a lush fantasy forest under soft golden sunlight',
+            'a lush fantasy nature scene under soft golden sunlight',
             'a dreamlike sky full of floating colorful balloons and clouds',
             'a vibrant fantasy land made of sweets and candy',
-            'a cozy bright room with confetti and ribbons',
-            'a cheerful flower meadow near a sparkling waterfall'
+            'a cheerful bright background with confetti and ribbons',
+            'a peaceful nature meadow with colorful flowers'
         ];
 
         const STYLES = [
-            'vibrant 3D animated movie render style',
-            'charming watercolor storybook illustration',
-            'bright pop-art anime digital artwork',
-            'soft pastel art style with delicate lighting',
-            'high detail paper-craft style 3D art'
+            'vibrant 3D animated style',
+            'charming watercolor picture book illustration',
+            'bright pop-art digital artwork',
+            'soft pastel art style with cute details',
+            '3D miniature diorama style'
         ];
 
         let deck = [];
@@ -756,7 +767,7 @@
             document.getElementById('message-box').innerText = msg;
         }
 
-        // --- 🎲 構図・アングル・スタイルをダイナミック抽出してAIイラストを生成 ---
+        // --- 🎨 人間（女性キャラ）の発生をブロックし、単語主体で描画 ---
         async function showMemorialModal(words, head, winnerName) {
             const modal = document.getElementById('modal');
             const loadingBox = document.getElementById('loading-box');
@@ -769,18 +780,16 @@
             canvas.style.display = 'none';
             buttons.style.display = 'none';
 
-            // 1. 各要素をランダムに選定して変化を最大化
             const randomComp = COMPOSITIONS[Math.floor(Math.random() * COMPOSITIONS.length)];
             const randomBg = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
             const randomStyle = STYLES[Math.floor(Math.random() * STYLES.length)];
 
-            const englishSubjects = words.map(w => WORD_ENGLISH_MAP[w] || w).join(', ');
+            const englishSubjects = words.map(w => WORD_ENGLISH_MAP[w] || w).join(' and ');
 
-            // プロンプトの組み立て
-            const promptText = `${randomStyle} of ${englishSubjects}, ${randomComp}, set in ${randomBg}, ultra-detailed, artistic masterpiece`;
+            // 人間・女の子・人物を強力ブロック指定（no humans, no person, no girls）
+            const promptText = `A high quality ${randomStyle} featuring ${englishSubjects}, ${randomComp}, set in ${randomBg}, no humans, no person, no girls, clear focus on the items and animals, masterpiece`;
             const encodedPrompt = encodeURIComponent(promptText);
             
-            // シード値も毎回完全ランダムにする
             const randomSeed = Math.floor(Math.random() * 999999);
             const aiImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=600&height=320&nologo=true&seed=${randomSeed}`;
 
