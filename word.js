@@ -1,18 +1,23 @@
-// ひらがなドンジャラ用 単語辞書データ
-// ※ html側の WORD_ENGLISH_MAP に登録されている単語はすべて網羅されています。
+// 初期表示用（フォールバック）
+let DICTIONARY = ["さる", "ねこ", "いぬ", "くま", "さかな", "りんご", "くるま"];
 
-const DICTIONARY = [
-    // --- 2文字の言葉 ---
-    "さる", "きじ", "ねこ", "いぬ", "くま", "とり", "ぞう", 
-    "うみ", "やま", "はな", "そら", "ほし", "あめ", "ゆき", 
-    "ほん", "かさ", "くつ", "ふね", "いす", "かみ", "はし",
+// ゲーム起動時にネット上から約5,000〜10,000語のひらがな辞書を自動ロード
+(async function loadLargeDictionary() {
+    try {
+        // オープンソースのひらがな単語リストを取得
+        const res = await fetch("https://raw.githubusercontent.com/mdehaan/Japanese-Word-List/master/japanese_words_hiragana.txt");
+        const text = await res.text();
+        
+        // 2〜5文字のひらがな単語をフィルター抽出
+        const loadedWords = text.split('\n')
+            .map(w => w.trim())
+            .filter(w => w.length >= 2 && w.length <= 5 && /^[\u3040-\u309F]+$/.test(w));
 
-    // --- 3文字の言葉 ---
-    "さかな", "うさぎ", "すいか", "あいす", "りんご", "くるま", 
-    "きつね", "たぬき", "ぱんだ", "みかん", "いちご", "ぶどう", 
-    "とまと", "かえる", "くじら", "でんしゃ", "ひこうき", 
-
-    // --- 4文字の言葉 ---
-    "らいおん", "ぺんぎん", "ひまわり", "あさがお", "どんぐり", 
-    "おもちゃ", "ふうせん", "ぬいぐるみ"
-];
+        if (loadedWords.length > 0) {
+            DICTIONARY = loadedWords;
+            console.log(`巨大辞書の読み込み完了: 全 ${DICTIONARY.length} 語`);
+        }
+    } catch (err) {
+        console.warn("外部辞書の読み込みに失敗したため、デフォルト辞書を使用します:", err);
+    }
+})();
